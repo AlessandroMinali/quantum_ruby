@@ -1,5 +1,4 @@
 require 'quantum_ruby'
-
 # should be added in upcoming ruby/matrix patch
 class Matrix
   def adjoint
@@ -146,13 +145,13 @@ x = Qubit.new(0, 1)
 y = Qubit.new(0, 1)
 raise unless x == y
 
-State.new(Matrix.column_vector([0, Math.sqrt(0.8), Math.sqrt(0.2), 0]), [x, y]).measure_partial(qubit: [y])
+State.new(Matrix.column_vector([0, Math.sqrt(0.8), Math.sqrt(0.2), 0]), [x, y]).measure_partial(y)
 raise if x == y
 
 x = Qubit.new(0, 1)
 y = Qubit.new(0, 1)
 z = Qubit.new(0, 1)
-State.new(Matrix.column_vector([0, 0.5, 0.5, 0, 0, 0.5, 0.5, 0]), [x, y, z]).measure_partial(qubit: [y])
+State.new(Matrix.column_vector([0, 0.5, 0.5, 0, 0, 0.5, 0.5, 0]), [x, y, z]).measure_partial(y)
 raise if (y == x) || (z == y)
 
 1_000.times do
@@ -161,7 +160,7 @@ raise if (y == x) || (z == y)
   z = Qubit.new(0, 1)
   a = Array.new(8, 0)
   a[rand(8)] = 1
-  r = State.new(Matrix.column_vector(a), [x, y, z]).measure_partial(qubit: [y, z]).join.to_i(2)
+  r = State.new(Matrix.column_vector(a), [x, y, z]).measure_partial(y, z).join.to_i(2)
   case r
   when 0
     raise unless y == Qubit.new(1, 0) && z == Qubit.new(1, 0)
@@ -180,7 +179,7 @@ raise if (y == x) || (z == y)
   z = Qubit.new(0, 1)
   a = Array.new(8, 0)
   a[rand(8)] = 1
-  r = State.new(Matrix.column_vector(a), [y, z, i]).measure_partial(qubit: [i, y]).join.to_i(2)
+  r = State.new(Matrix.column_vector(a), [y, z, i]).measure_partial(i, y).join.to_i(2)
   case r
   when 0
     raise unless y == Qubit.new(1, 0) && i == Qubit.new(1, 0)
@@ -200,7 +199,7 @@ raise if (y == x) || (z == y)
   i = Qubit.new(0, 1)
   a = Array.new(16, 0)
   a[rand(16)] = 1
-  r = State.new(Matrix.column_vector(a), [x, i, y, z]).measure_partial(qubit: [x, y, z]).join.to_i(2)
+  r = State.new(Matrix.column_vector(a), [x, i, y, z]).measure_partial(x, y, z).join.to_i(2)
   case r
   when 0
     raise unless x == Qubit.new(1, 0) && y == Qubit.new(1, 0) && z == Qubit.new(1, 0)
@@ -242,7 +241,7 @@ end
   s = g.*(a, s)
 
   # alice measure her two qubits and sends classical bits to bob
-  z, x = s.measure_partial(qubit: [a, b])
+  z, x = s.measure_partial(a, b)
   case [z, x].join.to_i(2)
   when 0
     raise unless a == Qubit.new(1, 0) && b == Qubit.new(1, 0)

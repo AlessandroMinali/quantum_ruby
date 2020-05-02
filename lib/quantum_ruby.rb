@@ -41,7 +41,7 @@ I_SYM          = 'i'
 module ExceptionForQuantum
   class NormalizationConstraint < StandardError
     def initialize
-      super('Normalizaton constraint failed. Amplitudes must equal 1')
+      super('Normalization constraint failed. Amplitudes must equal 1')
     end
   end
 
@@ -202,7 +202,7 @@ class State
     out.split('').map(&:to_i)
   end
 
-  def measure_partial(qubit:)
+  def measure_partial(*qubit)
     # find location of our desired qubit(s)
     qubit_ids = qubit.map { |i| @qubits.find_index { |j| j.hash == i .hash } }.sort
 
@@ -234,12 +234,12 @@ class State
     new_state = sub_result.fetch(out).map { |i| i[0] / squared_sum_mag }
 
     # Update each qubit
-    @qubits.each_with_index do |qubit, i|
-      qubit.entangled = false
+    @qubits.each_with_index do |q, i|
+      q.entangled = false
       if index = qubit_ids.find_index(i)
-        qubit.send(:vector=, Array.new(2, 0).tap { |vector| vector[out[index].to_i] = 1 })
+        q.send(:vector=, Array.new(2, 0).tap { |vector| vector[out[index].to_i] = 1 })
       else
-        qubit.send(:vector=, new_state)
+        q.send(:vector=, new_state)
       end
     end
     freeze
