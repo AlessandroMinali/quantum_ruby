@@ -77,14 +77,14 @@ state.measure_partial(target_qubit) # return 0 bit since control is 1
 ```
 
 #### Provided Gates
-X_GATE
-Y_GATE
-Z_GATE
-H_GATE
-T_GATE
-C_NOT_GATE
-SWAP_GATE
-TOFFOLI_GATE
+X_GATE  
+Y_GATE  
+Z_GATE  
+H_GATE  
+T_GATE  
+C_NOT_GATE  
+SWAP_GATE  
+TOFFOLI_GATE  
 Information about any of these gates behaviours can be found [here on wiki](https://en.wikipedia.org/wiki/Quantum_logic_gate).
 
 #### Advanced Gate Usage
