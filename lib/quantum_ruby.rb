@@ -172,10 +172,12 @@ class State
     @qubits = qubits.flatten.tap { |i| i.each { |j| j.entangled = true } }
   end
 
-  def measure(format: :default)
+  def measure
     v = @vector.to_a
-    @vector = Matrix.column_vector Array.new(@vector.row_count, 0) # reset state
+    # reset state
+    @vector = Matrix.column_vector Array.new(@vector.row_count, 0)
 
+    # "determine' 'winner'
     acc = 0
     out = nil
     secret = rand
@@ -188,13 +190,18 @@ class State
       end
     end
 
-    @vector.send(:[]=, out, 0, 1) # mark state
-    case format
-    when :bin_string
-      out.to_s(2).rjust(size, '0')
-    else
-      out
+    # Update state
+    @vector.send(:[]=, out, 0, 1)
+
+    # Update each qubit
+    out = out.to_s(2).rjust(size, '0')
+    result = out.split('').map(&:to_i)
+    @qubits.each_with_index do |qubit, index|
+      qubit.send(:vector=, Array.new(2, 0).tap { |vector| vector[out[0].to_i] = 1 })
+      out = out[1..-1]
     end
+    freeze
+    result
   end
 
   def measure_partial(qubit:)
@@ -229,15 +236,17 @@ class State
     result = out.split('').map(&:to_i)
     new_state = sub_result.fetch(out).map { |i| i[0] / squared_sum_mag }
 
+    # Update each qubit
     @qubits.each_with_index do |q, i|
       q.entangled = false
       if qubit_ids.include?(i)
-        q.send(:vector=, Array.new(2, 0).tap { |vector| vector[out[-1].to_i] = 1 })
-        out = out[0...-1]
+        q.send(:vector=, Array.new(2, 0).tap { |vector| vector[out[0].to_i] = 1 })
+        out = out[1..-1]
       else
         q.send(:vector=, new_state)
       end
     end
+    freeze
     result
   end
 

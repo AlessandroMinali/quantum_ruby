@@ -20,9 +20,7 @@ raise unless a * b == Matrix[[4, 4], [10, 8]]
 # Kronecker product test
 x = Matrix[[1, 2], [3, 4]]
 y = Matrix[[0, 5], [6, 7]]
-unless x.kronecker(y) == Matrix[[0, 5, 0, 10], [6, 7, 12, 14], [0, 15, 0, 20], [18, 21, 24, 28]]
-  raise
-end
+raise unless x.kronecker(y) == Matrix[[0, 5, 0, 10], [6, 7, 12, 14], [0, 15, 0, 20], [18, 21, 24, 28]]
 
 x = Matrix[[1], [2]]
 y = Matrix[[3], [4]]
@@ -59,7 +57,7 @@ raise unless H_GATE * H_GATE * z == State.new(Matrix[[0.6], [0.8]])
 
   # equal chance of result
   s = (H_GATE * Qubit.new(0, 1))
-  case s.measure
+  case s.measure[0]
   when 0
     raise unless s == State.new(Matrix[[1], [0]])
   when 1
@@ -67,13 +65,27 @@ raise unless H_GATE * H_GATE * z == State.new(Matrix[[0.6], [0.8]])
   else
     raise
   end
+
+  x = Qubit.new(1, 0)
+  y = Qubit.new(0, 1)
+  r = State.new(Matrix.column_vector([0, 1, 0, 0]), [x, y]).measure.sum
+  case r[0]
+  when 0
+    raise unless x == Qubit.new(1, 0) && y == Qubit.new(1, 0)
+  when 1
+    raise unless x == Qubit.new(1, 0) && y == Qubit.new(0, 1)
+  when 2
+    raise unless x == Qubit.new(0, 1) && y == Qubit.new(1, 0)
+  when 3
+    raise unless x == Qubit.new(0, 1) && y == Qubit.new(0, 1)
+  end
 end
 
 x = Qubit.new(1 / Math.sqrt(2), 1 / Math.sqrt(2))
-raise unless (H_GATE * x).measure.zero?
+raise unless (H_GATE * x).measure[0].zero?
 
 x = Qubit.new(1 / Math.sqrt(2), -1 / Math.sqrt(2))
-raise unless (H_GATE * x).measure == 1
+raise unless (H_GATE * x).measure[0] == 1
 
 # Backwards control gate!
 x = Qubit.new(1, 0)
@@ -85,32 +97,22 @@ raise unless z.*(x, y) == State.new(Matrix[[0.0], [0.0], [0.0], [1.0]])
 # Bell state
 x = Qubit.new(1, 0)
 y = Qubit.new(1, 0)
-unless C_NOT_GATE.*(H_GATE * x, y) == State.new(Matrix[[0.7071067811865475], [0.0], [0.0], [0.7071067811865475]])
-  raise
-end
+raise unless C_NOT_GATE.*(H_GATE * x, y) == State.new(Matrix[[0.7071067811865475], [0.0], [0.0], [0.7071067811865475]])
 
 # Unitary inversion of gates
-unless (C_NOT_GATE * H_GATE.kronecker(Matrix.identity(2))).adjoint == H_GATE.kronecker(Matrix.identity(2)) * C_NOT_GATE
-  raise
-end
+raise unless (C_NOT_GATE * H_GATE.kronecker(Matrix.identity(2))).adjoint == H_GATE.kronecker(Matrix.identity(2)) * C_NOT_GATE
 
 # Auto scale gates
 z = C_NOT_GATE.*(H_GATE * x, y)
-unless H_GATE.*(z, scale: :down) == State.new(0.5 * Matrix[[1], [1], [1], [-1]])
-  raise
-end
+raise unless H_GATE.*(z, scale: :down) == State.new(0.5 * Matrix[[1], [1], [1], [-1]])
 
 # TOFFOLI_GATE test
-unless TOFFOLI_GATE.*(Qubit.new(0, 1), Qubit.new(0, 1), Qubit.new(0, 1)) == State.new(Matrix.column_vector([0, 0, 0, 0, 0, 0, 1, 0]))
-  raise
-end
+raise unless TOFFOLI_GATE.*(Qubit.new(0, 1), Qubit.new(0, 1), Qubit.new(0, 1)) == State.new(Matrix.column_vector([0, 0, 0, 0, 0, 0, 1, 0]))
 
 # Build a TOFFOLI_GATE from simple gates (C_NOT, H_GATE, and T_GATE's only)
 T_3GATE_ADJOINT = I2.kronecker(I2).kronecker(T_GATE).adjoint
 C_3NOT_GATE = Gate[*Matrix[[1, 0], [0, 0]].kronecker(I2.kronecker(I2)) + Matrix[[0, 0], [0, 1]].kronecker(I2.kronecker(X_GATE))]
-unless TOFFOLI_GATE == C_NOT_GATE.*(T_GATE.kronecker(T_GATE.adjoint).*(C_NOT_GATE.kronecker(H_GATE).*(I2.kronecker(T_GATE).kronecker(T_GATE).*(C_3NOT_GATE.*(T_3GATE_ADJOINT.*(C_NOT_GATE.*(T_GATE.*(C_3NOT_GATE.*(T_3GATE_ADJOINT.*(C_NOT_GATE.*(I2.kronecker(I2).kronecker(H_GATE), scale: :up))), scale: :up), scale: :up))))), scale: :down), scale: :down).round
-  raise
-end
+  raise unless TOFFOLI_GATE == C_NOT_GATE.*(T_GATE.kronecker(T_GATE.adjoint).*(C_NOT_GATE.kronecker(H_GATE).*(I2.kronecker(T_GATE).kronecker(T_GATE).*(C_3NOT_GATE.*(T_3GATE_ADJOINT.*(C_NOT_GATE.*(T_GATE.*(C_3NOT_GATE.*(T_3GATE_ADJOINT.*(C_NOT_GATE.*(I2.kronecker(I2).kronecker(H_GATE), scale: :up))), scale: :up), scale: :up))))), scale: :down), scale: :down).round
 
 # Partial Measure
 x = Qubit.new(0, 1)
