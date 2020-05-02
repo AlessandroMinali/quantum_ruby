@@ -68,8 +68,8 @@ raise unless H_GATE * H_GATE * z == State.new(Matrix[[0.6], [0.8]])
 
   x = Qubit.new(1, 0)
   y = Qubit.new(0, 1)
-  r = State.new(Matrix.column_vector([0, 1, 0, 0]), [x, y]).measure.sum
-  case r[0]
+  r = State.new(Matrix.column_vector([0.5, 0.5, 0.5, 0.5]), [x, y]).measure.join.to_i(2)
+  case r
   when 0
     raise unless x == Qubit.new(1, 0) && y == Qubit.new(1, 0)
   when 1
@@ -128,8 +128,30 @@ z = Qubit.new(0, 1)
 State.new(Matrix.column_vector([0, 0.5, 0.5, 0, 0, 0.5, 0.5, 0]), [x, y, z]).measure_partial(qubit: [y])
 raise if (y == x) || (z == y)
 
+1_000.times do
+  x = Qubit.new(0, 1)
+  y = Qubit.new(0, 1)
+  z = Qubit.new(0, 1)
+  a = Array.new(8, 0)
+  a[rand(8)] = 1
+  r = State.new(Matrix.column_vector(a), [x, y, z]).measure_partial(qubit: [y, z]).join.to_i(2)
+  case r
+  when 0
+    raise unless y == Qubit.new(1, 0) && z == Qubit.new(1, 0)
+  when 1
+    raise unless y == Qubit.new(1, 0) && z == Qubit.new(0, 1)
+  when 2
+    raise unless y == Qubit.new(0, 1) && z == Qubit.new(1, 0)
+  when 3
+    raise unless y == Qubit.new(0, 1) && z == Qubit.new(0, 1)
+  else
+    raise
+  end
+end
+
 # # Quantum Teleportation
-100.times do
+# note for dev: measure_partial sub_result should be all equal
+1_000.times do
   # alice will teleport 'a' to bob
   a = Qubit.new(0, 1)
   b = Qubit.new(1, 0)
@@ -147,8 +169,21 @@ raise if (y == x) || (z == y)
   # alice continues
   g = H_GATE.kronecker(I2).kronecker(I2) * C_NOT_GATE.kronecker(I2)
   s = g.*(a, s)
+
   # alice measure her two qubits and sends classical bits to bob
   z, x = s.measure_partial(qubit: [a, b])
+  case [z, x].join.to_i(2)
+  when 0
+    raise unless a == Qubit.new(1, 0) && b == Qubit.new(1, 0)
+  when 1
+    raise unless a == Qubit.new(1, 0) && b == Qubit.new(0, 1)
+  when 2
+    raise unless a == Qubit.new(0, 1) && b == Qubit.new(1, 0)
+  when 3
+    raise unless a == Qubit.new(0, 1) && b == Qubit.new(0, 1)
+  else
+    raise
+  end
 
   # depending on what bobs gets, he applies gates to his qubit
   # and is able to regain alice's 'a' qubit's original state instantly!
@@ -159,4 +194,3 @@ raise if (y == x) || (z == y)
   # p a_dup, c
   raise unless a_dup == c
 end
-

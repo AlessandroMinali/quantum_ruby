@@ -173,16 +173,11 @@ class State
   end
 
   def measure
-    v = @vector.to_a
-    # reset state
-    @vector = Matrix.column_vector Array.new(@vector.row_count, 0)
-
     # "determine' 'winner'
     acc = 0
     out = nil
     secret = rand
-
-    v.each_with_index do |probability, index|
+    @vector.to_a.each_with_index do |probability, index|
       acc += probability[0].abs2
       if acc > secret
         out = index
@@ -190,6 +185,8 @@ class State
       end
     end
 
+    # Reset state
+    @vector = Matrix.column_vector Array.new(@vector.row_count, 0)
     # Update state
     @vector.send(:[]=, out, 0, 1)
 
@@ -206,7 +203,7 @@ class State
 
   def measure_partial(qubit:)
     # find location of our desired qubit(s)
-    qubit_ids = qubit.map { |i| @qubits.find_index { |j| j.hash == i .hash } }
+    qubit_ids = qubit.map { |i| @qubits.find_index { |j| j.hash == i .hash } }.sort
 
     # collect probabilities for qubit(s) states
     sub_result = @vector.to_a.flatten.each_with_index.group_by do |_probability, index|
@@ -216,7 +213,7 @@ class State
     end
 
     # calculate final probabilities for qubit(s) state
-    probabilities = sub_result.transform_values { |v| v.reduce(0) { |i, p| i + p[0].abs2 } }.values
+    probabilities = sub_result.sort.to_h.transform_values { |v| v.reduce(0) { |i, p| i + p[0].abs2 } }.values
     acc = 0
     out = nil
     secret = rand
@@ -233,21 +230,19 @@ class State
     # Renormalize
     squared_sum_mag = Math.sqrt(probabilities[out])
     out = out.to_s(2).rjust(qubit.length, '0')
-    result = out.split('').map(&:to_i)
     new_state = sub_result.fetch(out).map { |i| i[0] / squared_sum_mag }
 
     # Update each qubit
-    @qubits.each_with_index do |q, i|
-      q.entangled = false
-      if qubit_ids.include?(i)
-        q.send(:vector=, Array.new(2, 0).tap { |vector| vector[out[0].to_i] = 1 })
-        out = out[1..-1]
+    @qubits.each_with_index do |qubit, i|
+      qubit.entangled = false
+      if index = qubit_ids.find_index(i)
+        qubit.send(:vector=, Array.new(2, 0).tap { |vector| vector[out[index].to_i] = 1 })
       else
-        q.send(:vector=, new_state)
+        qubit.send(:vector=, new_state)
       end
     end
     freeze
-    result
+    out.split('').map(&:to_i)
   end
 
   private
