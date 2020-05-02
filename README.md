@@ -1,10 +1,11 @@
+
 # QuantumRuby
 
-This is a N-qubit simulator in under 300 lines of ruby. Meaning you can build arbitrarily large quantum circuits programmatically and simulate their behaviours.
+This is a quantum computer simulator in under 300 lines of ruby. Meaning you can build arbitrarily large quantum circuits programmatically and simulate their behaviours.
 
 <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Qcircuit_CNOTfromSQRTSWAP.svg/1024px-Qcircuit_CNOTfromSQRTSWAP.svg.png" />
 
-Learning about quantum computing isn't that difficult. Trust me! I learned and built this simulator within fives days with no prior quantum computing knowledge. This can also be a great tool to facilitate learning about quantum computing.
+Learning about quantum computing isn't that difficult. Trust me! I learned and built this simulator within five days with no prior quantum computing knowledge. This gem can also be a great tool to facilitate learning about quantum computing.
 
 [Check out the many examples in this repo.](https://github.com/AlessandroMinali/quantum_ruby/examples)
 
@@ -35,7 +36,7 @@ require 'quantum_ruby`
 
 ## Usage
 
-**This gem adds `Matrix#kronecker` and `Complex#round` onto Ruby base classes**
+**This gem adds `Matrix#kronecker` and `Complex#round` onto ruby base classes**
 
 There are three objects that this gem uses to simulate any quantum circuitry.
 
@@ -89,7 +90,7 @@ Information about any of these gates behaviours can be found [here on wiki](http
 #### Advanced Gate Usage
 
 #### 1. Making your own gates
-This can be done simply like a normal Ruby Matrix:
+This can be done simply like creating a ruby `Matrix`:
 ```ruby
 x = Matrix[[0, 1], [1, 0]]
 y = Gate[[0, 1], [1, 0]]
