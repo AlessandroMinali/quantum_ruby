@@ -174,6 +174,51 @@ raise if (y == x) || (z == y)
   else
     raise
   end
+
+  i = Qubit.new(0, 1)
+  y = Qubit.new(0, 1)
+  z = Qubit.new(0, 1)
+  a = Array.new(8, 0)
+  a[rand(8)] = 1
+  r = State.new(Matrix.column_vector(a), [y, z, i]).measure_partial(qubit: [i, y]).join.to_i(2)
+  case r
+  when 0
+    raise unless y == Qubit.new(1, 0) && i == Qubit.new(1, 0)
+  when 1
+    raise unless y == Qubit.new(1, 0) && i == Qubit.new(0, 1)
+  when 2
+    raise unless y == Qubit.new(0, 1) && i == Qubit.new(1, 0)
+  when 3
+    raise unless y == Qubit.new(0, 1) && i == Qubit.new(0, 1)
+  else
+    raise
+  end
+
+  x = Qubit.new(0, 1)
+  y = Qubit.new(0, 1)
+  z = Qubit.new(0, 1)
+  i = Qubit.new(0, 1)
+  a = Array.new(16, 0)
+  a[rand(16)] = 1
+  r = State.new(Matrix.column_vector(a), [x, i, y, z]).measure_partial(qubit: [x, y, z]).join.to_i(2)
+  case r
+  when 0
+    raise unless x == Qubit.new(1, 0) && y == Qubit.new(1, 0) && z == Qubit.new(1, 0)
+  when 1
+    raise unless x == Qubit.new(1, 0) && y == Qubit.new(1, 0) && z == Qubit.new(0, 1)
+  when 2
+    raise unless x == Qubit.new(1, 0) && y == Qubit.new(0, 1) && z == Qubit.new(1, 0)
+  when 3
+    raise unless x == Qubit.new(1, 0) && y == Qubit.new(0, 1) && z == Qubit.new(0, 1)
+  when 4
+    raise unless x == Qubit.new(0, 1) && y == Qubit.new(1, 0) && z == Qubit.new(1, 0)
+  when 5
+    raise unless x == Qubit.new(0, 1) && y == Qubit.new(1, 0) && z == Qubit.new(0, 1)
+  when 6
+    raise unless x == Qubit.new(0, 1) && y == Qubit.new(0, 1) && z == Qubit.new(1, 0)
+  when 7
+    raise unless x == Qubit.new(0, 1) && y == Qubit.new(0, 1) && z == Qubit.new(0, 1)
+  end
 end
 
 # # Quantum Teleportation
