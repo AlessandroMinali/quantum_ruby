@@ -68,7 +68,9 @@ raise unless H_GATE * H_GATE * z == State.new(Matrix[[0.6], [0.8]])
 
   x = Qubit.new(1, 0)
   y = Qubit.new(0, 1)
-  r = State.new(Matrix.column_vector([0.5, 0.5, 0.5, 0.5]), [x, y]).measure.join.to_i(2)
+  a = Array.new(4, 0)
+  a[rand(4)] = 1
+  r = State.new(Matrix.column_vector(a), [x, y]).measure.join.to_i(2)
   case r
   when 0
     raise unless x == Qubit.new(1, 0) && y == Qubit.new(1, 0)
@@ -78,6 +80,31 @@ raise unless H_GATE * H_GATE * z == State.new(Matrix[[0.6], [0.8]])
     raise unless x == Qubit.new(0, 1) && y == Qubit.new(1, 0)
   when 3
     raise unless x == Qubit.new(0, 1) && y == Qubit.new(0, 1)
+  end
+
+  x = Qubit.new(1, 0)
+  y = Qubit.new(0, 1)
+  z = Qubit.new(0, 1)
+  a = Array.new(8, 0)
+  a[rand(8)] = 1
+  r = State.new(Matrix.column_vector(a), [x, y, z]).measure.join.to_i(2)
+  case r
+  when 0
+    raise unless x == Qubit.new(1, 0) && y == Qubit.new(1, 0) && z == Qubit.new(1, 0)
+  when 1
+    raise unless x == Qubit.new(1, 0) && y == Qubit.new(1, 0) && z == Qubit.new(0, 1)
+  when 2
+    raise unless x == Qubit.new(1, 0) && y == Qubit.new(0, 1) && z == Qubit.new(1, 0)
+  when 3
+    raise unless x == Qubit.new(1, 0) && y == Qubit.new(0, 1) && z == Qubit.new(0, 1)
+  when 4
+    raise unless x == Qubit.new(0, 1) && y == Qubit.new(1, 0) && z == Qubit.new(1, 0)
+  when 5
+    raise unless x == Qubit.new(0, 1) && y == Qubit.new(1, 0) && z == Qubit.new(0, 1)
+  when 6
+    raise unless x == Qubit.new(0, 1) && y == Qubit.new(0, 1) && z == Qubit.new(1, 0)
+  when 7
+    raise unless x == Qubit.new(0, 1) && y == Qubit.new(0, 1) && z == Qubit.new(0, 1)
   end
 end
 
@@ -150,7 +177,6 @@ raise if (y == x) || (z == y)
 end
 
 # # Quantum Teleportation
-# note for dev: measure_partial sub_result should be all equal
 1_000.times do
   # alice will teleport 'a' to bob
   a = Qubit.new(0, 1)

@@ -177,6 +177,7 @@ class State
     acc = 0
     out = nil
     secret = rand
+
     @vector.to_a.each_with_index do |probability, index|
       acc += probability[0].abs2
       if acc > secret
@@ -192,13 +193,13 @@ class State
 
     # Update each qubit
     out = out.to_s(2).rjust(size, '0')
-    result = out.split('').map(&:to_i)
     @qubits.each_with_index do |qubit, index|
-      qubit.send(:vector=, Array.new(2, 0).tap { |vector| vector[out[0].to_i] = 1 })
-      out = out[1..-1]
+      qubit.entangled = false
+      qubit.send(:vector=, Array.new(2, 0).tap { |vector| vector[out[index].to_i] = 1 })
     end
+
     freeze
-    result
+    out.split('').map(&:to_i)
   end
 
   def measure_partial(qubit:)
