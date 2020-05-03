@@ -12,7 +12,7 @@ require_relative '../lib/quantum_ruby'
 #   y ---| Gate | -- |  GATE  | -
 
 # My lay man understanding of maximal entanglement comes from the state that is produced here.
-# Either the result can be 00 or 11 based on the probalities. In this sense the qubits
+# Either the result can be 00 or 11 based on the probabilities. In this sense the qubits
 # are completely dependent on one another for the outcome ie. if one is 0 the other is 0, and likewise
 # if one is 1 the other must also be 1. This property holds over great distances so even after separating
 # if either is measure the partner instantly knows the result. This should sound weird because cause and

@@ -1,10 +1,8 @@
 require_relative '../lib/quantum_ruby'
 # Partial Measure
-
-
-# After a partial measure qubits so no longer be equal
-# One outcome is chosen for the desired qubit and all other qubits collapse to a normalized version of the 
-# new state
+# After a partial measure qubits are no longer equal
+# One outcome is chosen for the desired qubit and all other qubits collapse to a 
+# normalized version of the new state
 
 # y is measured in a system of 2 qubits
 x = Qubit.new(0, 1)

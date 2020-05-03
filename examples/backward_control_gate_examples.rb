@@ -25,5 +25,5 @@ x = Qubit.new(1, 0) # the control bit, 1
 y = Qubit.new(0, 1) # the target bit, 0
 h_big = H_GATE.kronecker(H_GATE)
 raise unless (h_big * (C_NOT_GATE * h_big)).*(x, y).measure
-# control bit is fliped but target is the same!
+# control bit is flipped but target is the same!
 raise unless x == Qubit.new(0, 1) && y == Qubit.new(0, 1)

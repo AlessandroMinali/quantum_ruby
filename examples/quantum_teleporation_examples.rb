@@ -21,11 +21,11 @@ require_relative '../lib/quantum_ruby'
   s = C_NOT_GATE.*(H_GATE * b, c)
   # bob takes 'c' far away
 
-  # alice continues
+  # Alice continues
   g = H_GATE.kronecker(I2).kronecker(I2) * C_NOT_GATE.kronecker(I2)
   s = g.*(a, s)
 
-  # alice measure her two qubits and sends classical bits to bob
+  # Alice measure her two qubits and sends classical bits to bob
   z, x = s.measure_partial(a, b)
   case [z, x].join.to_i(2)
   when 0
@@ -41,7 +41,7 @@ require_relative '../lib/quantum_ruby'
   end
 
   # depending on what bobs gets, he applies gates to his qubit
-  # and is able to regain alice's 'a' qubit's original state instantly!
+  # and is able to regain Alice’s 'a' qubit's original state instantly!
   c = X_GATE * c if x == 1
   c = Z_GATE * c if z == 1
 

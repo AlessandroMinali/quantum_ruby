@@ -19,7 +19,7 @@ require_relative '../lib/quantum_ruby'
     raise
   end
 
-  # Multi qubit systems update individual qubits to their new state after a measuerment occurs
+  # Multi qubit systems update individual qubits to their new state after a measurement occurs
   x = Qubit.new(1, 0)
   y = Qubit.new(0, 1)
   a = Array.new(4, 0)

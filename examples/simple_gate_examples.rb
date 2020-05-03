@@ -16,7 +16,7 @@ raise unless H_GATE * z == State.new(Matrix[[1 / Math.sqrt(2)], [1 / Math.sqrt(2
 z = Qubit.new(0.6, 0.8)
 raise unless H_GATE * H_GATE * z == State.new(Matrix[[0.6], [0.8]])
 
-# A mathimatical demonstration of gate reversibility ie. Unitary inversion of gates
+# A mathematical demonstration of gate reversibility ie. Unitary inversion of gates
 # More details here:
 #   https://en.wikipedia.org/wiki/Unitary_matrix
 #   https://quantum.country/qcvc#what-does-it-mean-to-be-unitary

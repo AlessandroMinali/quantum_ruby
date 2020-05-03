@@ -1,4 +1,3 @@
-
 # QuantumRuby
 
 This is a quantum computer simulator in under 300 lines of ruby. Meaning you can build arbitrarily large quantum circuits programmatically and simulate their behaviours.
