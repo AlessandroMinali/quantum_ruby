@@ -1,9 +1,9 @@
 require_relative '../lib/quantum_ruby'
 
 # Auto scale gates
-# Sometimes we want to apply a n-qubits to a gate that takes <n inputs
-# To do this we can scale with the Identity matrix. This has the effect of taking in a larger
-# input but still only affecting <n inputs
+# Sometimes we want to apply a gate to N-qubits that takes only takes less than N inputs
+# To accomodate this we can scale the gatewith the identity matrix.
+# This has the effect of taking in a larger input size but still only affecting less than N inputs
 # More details here:
 #   https://en.wikipedia.org/wiki/Quantum_logic_gate#Application_on_entangled_states
 

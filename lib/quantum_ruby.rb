@@ -190,7 +190,7 @@ end
 
 #
 # The +State+ class represents a combination of qubits' superpositions. They are stored a 2**n-dimensional column vector where
-# n is the numbers of qubits entangled.
+# N is the numbers of qubits entangled.
 # State is usually produce after the applications of gates to a number of qubits and is continually passed forward through
 # the quantum circuit until a measurement is made.
 # State can be operated on via matrix multiplication or measurement(partial or otherwise).
@@ -215,40 +215,13 @@ class State
   # Returns an array of bits representing the final state of all entangled qubits
   # All qubits are written with their new state and all superposition information is lost
   def measure
-    # determine 'winner'
-    # acc = 0
-    # out = nil
-    # secret = rand
-    # @vector.to_a.each_with_index do |probability, index|
-    #   acc += probability[0].abs2
-    #   if acc > secret
-    #     out = index
-    #     break
-    #   end
-    # end
-
-    # # Reset state
-    # @vector = Matrix.column_vector Array.new(@vector.row_count, 0)
-
-    # # Update state
-    # @vector.send(:[]=, out, 0, 1)
-
-    # # Update each qubit
-    # out = out.to_s(2).rjust(size, '0')
-    # @qubits.each_with_index do |qubit, index|
-    #   qubit.entangled = false
-    #   qubit.send(:vector=, Array.new(2, 0).tap { |vector| vector[out[index].to_i] = 1 })
-    # end
-
-    # # State should no longer be used
-    # out.split('').map(&:to_i)
     measure_partial(@qubits)
   end
 
   #
   # Takes an array of qubits for which a measurement should be made
   # Returns an array of bits representing the final state of the requested qubits
-  # All others qubits are written with a new state and all superposition information is lost
+  # All others qubits are written with a normalized state and all superposition information is lost
   def measure_partial(*qubit)
     # find location of our desired qubit(s)
     qubit_ids = qubit.map { |i| @qubits.find_index { |j| j.hash == i .hash } }.sort
