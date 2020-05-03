@@ -1,4 +1,4 @@
-require 'quantum_ruby'
+require_relative '../lib/quantum_ruby'
 # All the readme examples tested
 
 # qubit_1 = Qubit.new(1, 0)

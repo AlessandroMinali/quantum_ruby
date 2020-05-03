@@ -1,7 +1,7 @@
-require "quantum_ruby/version"
+require 'quantum_ruby/version'
 require 'matrix'
 
-# Overrides for base Ruby classes
+# Overrides for base ruby base classes
 class Matrix
   def kronecker(m)
     raise ErrOperationNotDefined, [__method__, self.class, m.class] unless m.is_a?(Matrix)
@@ -30,7 +30,7 @@ class Complex
     Complex(real.round(digits), imag.round(digits))
   end
 end
-# End of Overrides for base Ruby classes
+# End of Overrides for base ruby base classes
 
 ZERO_KET       = '|0>'
 ONE_KET        = '|1>'
@@ -41,7 +41,7 @@ I_SYM          = 'i'
 module ExceptionForQuantum
   class NormalizationConstraint < StandardError
     def initialize
-      super('Normalization constraint failed. Amplitudes must equal 1')
+      super('Normalization constraint failed. Sum of squared amplitudes must equal 1')
     end
   end
 
@@ -67,8 +67,11 @@ module QuantumVector
   include ExceptionForQuantum
   using QuantumComplexPrinter
 
-
   PRECISION = 14
+
+  def ==(other)
+    @vector.map { |i| i.round(PRECISION) } == other.vector.map { |i| i.round(PRECISION) }
+  end
 
   def state
     out = '['
@@ -77,10 +80,6 @@ module QuantumVector
       out << "\n " << i.to_s
     end
     out << ']'
-  end
-
-  def ==(other)
-    @vector.map { |i| i.round(PRECISION) } == other.vector.map { |i| i.round(PRECISION) }
   end
 
   private
@@ -95,17 +94,33 @@ module QuantumVector
 end
 
 class Qubit
-  attr_reader :vector
+  attr_reader   :vector
   attr_accessor :entangled
   include QuantumVector
   using QuantumComplexPrinter
 
-  ENTANGLED_WARNING = "Alert:  This qubit is entangled.\n\tPlease locate and measure the State\n\tthat contains this qubit's superposition."
+  ENTANGLED_WARNING = "Alert:  This qubit is entangled.\n\tPlease locate and measure the State\n\tthat contains this qubit's superposition.".freeze
 
   def initialize(zero, one)
     @vector = Matrix[[zero], [one]]
     column_vector?
     normalized?
+  end
+
+  def measure
+    if rand < @vector[0, 0].abs2
+      @vector = [1, 0]
+      0
+    else
+      @vector = [0, 1]
+      1
+    end
+  end
+
+  def state
+    return if entangled?
+
+    super
   end
 
   def to_s
@@ -121,22 +136,6 @@ class Qubit
     out
   end
 
-  def state
-    return(puts(ENTANGLED_WARNING)) if entangled?
-
-    super
-  end
-
-  def measure
-    if rand < @vector[0, 0].abs2
-      @vector = [1, 0]
-      0
-    else
-      @vector = [0, 1]
-      1
-    end
-  end
-
   private
 
   def el(row)
@@ -144,18 +143,14 @@ class Qubit
     out.is_a?(Float) || out.is_a?(Complex) ? out.round(PRECISION) : out
   end
 
+  def entangled?
+    puts ENTANGLED_WARNING if entangled
+    entangled
+  end
+
   def vector=(array)
     @vector = Matrix.column_vector(array)
     normalized?
-  end
-
-  def entangled?
-    if entangled
-      puts ENTANGLED_WARNING
-      true
-    else
-      false
-    end
   end
 end
 
@@ -173,11 +168,10 @@ class State
   end
 
   def measure
-    # "determine' 'winner'
+    # determine 'winner'
     acc = 0
     out = nil
     secret = rand
-
     @vector.to_a.each_with_index do |probability, index|
       acc += probability[0].abs2
       if acc > secret
@@ -188,6 +182,7 @@ class State
 
     # Reset state
     @vector = Matrix.column_vector Array.new(@vector.row_count, 0)
+
     # Update state
     @vector.send(:[]=, out, 0, 1)
 
@@ -198,6 +193,7 @@ class State
       qubit.send(:vector=, Array.new(2, 0).tap { |vector| vector[out[index].to_i] = 1 })
     end
 
+    # State should no longer be used
     freeze
     out.split('').map(&:to_i)
   end
@@ -215,11 +211,11 @@ class State
 
     # calculate final probabilities for qubit(s) state
     probabilities = sub_result.sort.to_h.transform_values { |v| v.reduce(0) { |i, p| i + p[0].abs2 } }.values
+
+    # determine 'winner'
     acc = 0
     out = nil
     secret = rand
-
-    # "determine' 'winner'
     probabilities.each_with_index do |probability, index|
       acc += probability
       if acc > secret
@@ -236,12 +232,14 @@ class State
     # Update each qubit
     @qubits.each_with_index do |q, i|
       q.entangled = false
-      if index = qubit_ids.find_index(i)
+      if (index = qubit_ids.find_index(i))
         q.send(:vector=, Array.new(2, 0).tap { |vector| vector[out[index].to_i] = 1 })
       else
         q.send(:vector=, new_state)
       end
     end
+
+    # State should no longer be used
     freeze
     out.split('').map(&:to_i)
   end
@@ -288,11 +286,45 @@ class Gate < Matrix
 end
 
 I2 = Gate.identity(2)
-X_GATE = Gate[[0, 1], [1, 0]]
-Y_GATE = Gate[[0, -1i], [1i, 0]]
-Z_GATE = Gate[[1, 0], [0, -1]]
-H_GATE = 1 / Math.sqrt(2) * Gate[[1, 1], [1, -1]]
-T_GATE = Gate[[1, 0], [0, Math::E**((1i * Math::PI) / 4)]]
-C_NOT_GATE = Gate[[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 0, 1], [0, 0, 1, 0]]
-SWAP_GATE = Gate[[1, 0, 0, 0], [0, 0, 1, 0], [0, 1, 0, 0], [0, 0, 0, 1]]
-TOFFOLI_GATE = Gate[[1, 0, 0, 0, 0, 0, 0, 0], [0, 1, 0, 0, 0, 0, 0, 0], [0, 0, 1, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0], [0, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 1], [0, 0, 0, 0, 0, 0, 1, 0]]
+
+X_GATE = Gate[
+[0, 1],
+[1, 0]]
+
+Y_GATE = Gate[
+[0, -1i],
+[1i, 0]]
+
+Z_GATE = Gate[
+[1,  0],
+[0, -1]]
+
+H_GATE = 1 / Math.sqrt(2) * Gate[
+[1,  1],
+[1, -1]]
+
+T_GATE = Gate[
+[1,                              0],
+[0, Math::E**((1i * Math::PI) / 4)]]
+
+C_NOT_GATE = Gate[
+[1, 0, 0, 0],
+[0, 1, 0, 0],
+[0, 0, 0, 1],
+[0, 0, 1, 0]]
+
+SWAP_GATE = Gate[
+[1, 0, 0, 0],
+[0, 0, 1, 0],
+[0, 1, 0, 0],
+[0, 0, 0, 1]]
+
+TOFFOLI_GATE = Gate[
+[1, 0, 0, 0, 0, 0, 0, 0],
+[0, 1, 0, 0, 0, 0, 0, 0],
+[0, 0, 1, 0, 0, 0, 0, 0],
+[0, 0, 0, 1, 0, 0, 0, 0],
+[0, 0, 0, 0, 1, 0, 0, 0],
+[0, 0, 0, 0, 0, 1, 0, 0],
+[0, 0, 0, 0, 0, 0, 0, 1],
+[0, 0, 0, 0, 0, 0, 1, 0]]

@@ -1,10 +1,4 @@
-require 'quantum_ruby'
-# should be added in upcoming ruby/matrix patch
-class Matrix
-  def adjoint
-    conjugate.transpose
-  end
-end
+require_relative '../lib/quantum_ruby'
 
 # Matrix * test
 a = Matrix[[1, 2, 3], [4, 5, 6]]
@@ -125,6 +119,12 @@ x = Qubit.new(1, 0)
 y = Qubit.new(1, 0)
 raise unless C_NOT_GATE.*(H_GATE * x, y) == State.new(Matrix[[0.7071067811865475], [0.0], [0.0], [0.7071067811865475]])
 
+# should be added in upcoming ruby/matrix patch
+class Matrix
+  def adjoint
+    conjugate.transpose
+  end
+end
 # Unitary inversion of gates
 raise unless (C_NOT_GATE * H_GATE.kronecker(Matrix.identity(2))).adjoint == H_GATE.kronecker(Matrix.identity(2)) * C_NOT_GATE
 
