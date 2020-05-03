@@ -1,8 +1,13 @@
 require 'quantum_ruby/version'
 require 'matrix'
 
+#
 # Overrides for base ruby base classes
 class Matrix
+  #
+  # Takes two arbitrary sized resulting in a block matrix
+  # according to the Kronecker Product
+  # Details: https://en.wikipedia.org/wiki/Kronecker_product
   def kronecker(m)
     raise ErrOperationNotDefined, [__method__, self.class, m.class] unless m.is_a?(Matrix)
 
@@ -32,11 +37,11 @@ class Complex
 end
 # End of Overrides for base ruby base classes
 
-ZERO_KET       = '|0>'
-ONE_KET        = '|1>'
-ADD_SYM        = ' + '
-ADD_SYM_SQUISH = '+'
-I_SYM          = 'i'
+ZERO_KET       = '|0>'.freeze
+ONE_KET        = '|1>'.freeze
+ADD_SYM        = ' + '.freeze
+ADD_SYM_SQUISH = '+'.freeze
+I_SYM          = 'i'.freeze
 
 module ExceptionForQuantum
   class NormalizationConstraint < StandardError
@@ -46,7 +51,7 @@ module ExceptionForQuantum
   end
 
   class ColumnMatrxiConstraint < StandardError
-    def initalize
+    def initialize
       super('Vector supplied must be a Matrix with a single column.')
     end
   end
@@ -63,6 +68,8 @@ module QuantumComplexPrinter
   end
 end
 
+#
+# Contains helper functions for Qubit and State objects
 module QuantumVector
   include ExceptionForQuantum
   using QuantumComplexPrinter
@@ -84,15 +91,21 @@ module QuantumVector
 
   private
 
-  def column_vector?
-    raise ColumnMatrxiConstraint unless @vector.is_a?(Matrix) && (@vector.column_count == 1)
-  end
-
+  #
+  # Qubit and State vectors must be normalized so that the sum
+  # of squared amplitudes is equal to 1. This is a probability constraints saying that probabilities
+  # must sum to 1
+  #   Qubit.new(1, 1) # fail
+  #   Qubit.new(1, 0) # pass
+  #   Qubit.new(1/Math.sqrt(2), 1/Math.sqrt(2)) # pass
   def normalized?
     raise NormalizationConstraint unless @vector.reduce(0) { |i, v| i + v.abs2 }.round(PRECISION) == 1
   end
 end
 
+#
+# The +Qubit+ class represents quantum bit. They are stored a 2-dimensional column vector.
+# Qubits can be operated on via matrix multiplication or measurement.
 class Qubit
   attr_reader   :vector
   attr_accessor :entangled
@@ -101,12 +114,23 @@ class Qubit
 
   ENTANGLED_WARNING = "Alert:  This qubit is entangled.\n\tPlease locate and measure the State\n\tthat contains this qubit's superposition.".freeze
 
+  #
+  # Takes two values for the superposition of |0> and |1> respectively and store it in a Qubit
+  # Values must obey the normalization constraint
   def initialize(zero, one)
     @vector = Matrix[[zero], [one]]
-    column_vector?
     normalized?
   end
 
+  #
+  # Measurement can only happen at the expense of information elsewhere in the system.
+  # If two qubits are combined then their combined state becomes dependent so doing something to one
+  # can affect the other. This applies both to further operations or measurement.
+  # After measurement all related qubits' superpositions collapse to a classical interpretation, either 0 or 1
+  #   Qubit.news(1, 0).to_s # 0, qubit remains the same
+  #   Qubit.news(0, 1).to_s # 1, qubit remains the same
+  #   Qubit.new(1/Math.sqrt(2), 1/Math.sqrt(2)) # either 0 or 1 and qubit superposition collapses
+  #                                               to look like one the above qubits depending on the outcome
   def measure
     if rand < @vector[0, 0].abs2
       @vector = [1, 0]
@@ -117,12 +141,22 @@ class Qubit
     end
   end
 
+  #
+  # Return the qubit's superposition as a pretty printed array
+  #   Qubit.news(1, 0).state
+  #   #   [1
+  #   #    0]
   def state
     return if entangled?
 
     super
   end
 
+  #
+  # Returns the qubit's superposition in Bra-Ket notation
+  #   Qubit.news(1, 0).to_s # 1|0>
+  #   Qubit.news(0, 1).to_s # 1|1>
+  #   Qubit.new(1/Math.sqrt(2), 1/Math.sqrt(2)) # 0.707|0> + 0.707|1>
   def to_s
     return if entangled?
 
@@ -154,11 +188,21 @@ class Qubit
   end
 end
 
+#
+# The +State+ class represents a combination of qubits' superpositions. They are stored a 2**n-dimensional column vector where
+# n is the numbers of qubits entangled.
+# State is usually produce after the applications of gates to a number of qubits and is continually passed forward through
+# the quantum circuit until a measurement is made.
+# State can be operated on via matrix multiplication or measurement(partial or otherwise).
 class State
   attr_reader  :vector
   attr_reader  :qubits
   include QuantumVector
 
+  #
+  # Takes a column matrix representing N qubits and the corresponding superposition
+  # Values of the matrix must obey the normalization constraint
+  # Additional takes references to the actual qubits so that they can be updated in the future
   def initialize(vector, *qubits)
     @vector = vector
     column_vector?
@@ -167,37 +211,44 @@ class State
     @qubits = qubits.flatten.tap { |i| i.each { |j| j.entangled = true } }
   end
 
+  #
+  # Returns an array of bits representing the final state of all entangled qubits
+  # All qubits are written with their new state and all superposition information is lost
   def measure
     # determine 'winner'
-    acc = 0
-    out = nil
-    secret = rand
-    @vector.to_a.each_with_index do |probability, index|
-      acc += probability[0].abs2
-      if acc > secret
-        out = index
-        break
-      end
-    end
+    # acc = 0
+    # out = nil
+    # secret = rand
+    # @vector.to_a.each_with_index do |probability, index|
+    #   acc += probability[0].abs2
+    #   if acc > secret
+    #     out = index
+    #     break
+    #   end
+    # end
 
-    # Reset state
-    @vector = Matrix.column_vector Array.new(@vector.row_count, 0)
+    # # Reset state
+    # @vector = Matrix.column_vector Array.new(@vector.row_count, 0)
 
-    # Update state
-    @vector.send(:[]=, out, 0, 1)
+    # # Update state
+    # @vector.send(:[]=, out, 0, 1)
 
-    # Update each qubit
-    out = out.to_s(2).rjust(size, '0')
-    @qubits.each_with_index do |qubit, index|
-      qubit.entangled = false
-      qubit.send(:vector=, Array.new(2, 0).tap { |vector| vector[out[index].to_i] = 1 })
-    end
+    # # Update each qubit
+    # out = out.to_s(2).rjust(size, '0')
+    # @qubits.each_with_index do |qubit, index|
+    #   qubit.entangled = false
+    #   qubit.send(:vector=, Array.new(2, 0).tap { |vector| vector[out[index].to_i] = 1 })
+    # end
 
-    # State should no longer be used
-    freeze
-    out.split('').map(&:to_i)
+    # # State should no longer be used
+    # out.split('').map(&:to_i)
+    measure_partial(@qubits)
   end
 
+  #
+  # Takes an array of qubits for which a measurement should be made
+  # Returns an array of bits representing the final state of the requested qubits
+  # All others qubits are written with a new state and all superposition information is lost
   def measure_partial(*qubit)
     # find location of our desired qubit(s)
     qubit_ids = qubit.map { |i| @qubits.find_index { |j| j.hash == i .hash } }.sort
@@ -240,19 +291,45 @@ class State
     end
 
     # State should no longer be used
-    freeze
     out.split('').map(&:to_i)
   end
 
   private
+
+  def column_vector?
+    raise ColumnMatrxiConstraint unless @vector.is_a?(Matrix) && (@vector.column_count == 1)
+  end
 
   def size
     Math.log(@vector.row_count, 2)
   end
 end
 
+#
+# The +Gate+ class represents quantum logic gates as matrices.
+# These matrices should be square and unitary. It is up to the user to perform these checks if they want a custom gate.
+# There are a number of gates provided in this gem:
+  # X_GATE
+  # Y_GATE
+  # Z_GATE
+  # H_GATE
+  # T_GATE
+  # C_NOT_GATE
+  # SWAP_GATE
+  # TOFFOLI_GATE
 class Gate < Matrix
-  # can take gate, qubit, or state
+  #
+  # Applies the 'effect' of the gate on the arguments.
+  # The matrix operation on a gate can take multiple arguments but the dimensions must match according to the general
+  # rules of matrix multiplication.
+  #
+  # Gates can be scaled if you want to only affect less than N qubits of a system. Scaling occurs either up or down. If both is desired
+  # choose one direction and manually scale the other direction.
+  # NOTE scaling is done brute force and may no be applicable to the needs of your circuit.
+  # Refer to scaling examples for more details: https://github.com/AlessandroMinali/exanples/auto_scaling_gates_examples.rb
+  #
+  # Can take Gate, Qubit, or State
+  # Results in a new Gate if supplied a Gate, otherwise returns a new State
   def *(*args, scale: nil)
     if scale
       arg = begin
