@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    quantum_ruby (0.1.1)
+    quantum_ruby (0.9.0)
 
 GEM
   remote: https://rubygems.org/
