@@ -299,7 +299,7 @@ class Gate < Matrix
   # Gates can be scaled if you want to only affect less than N qubits of a system. Scaling occurs either up or down. If both is desired
   # choose one direction and manually scale the other direction.
   # NOTE scaling is done brute force and may no be applicable to the needs of your circuit.
-  # Refer to scaling examples for more details: https://github.com/AlessandroMinali/exanples/auto_scaling_gates_examples.rb
+  # Refer to scaling examples for more details: https://github.com/AlessandroMinali/quantum_ruby/tree/master/examples/auto_scaling_gates_examples.rb
   #
   # Can take Gate, Qubit, or State
   # Results in a new Gate if supplied a Gate, otherwise returns a new State
