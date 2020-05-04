@@ -6,8 +6,8 @@ This is a quantum computer simulator in under 300 lines of ruby. Meaning you can
 
 Learning about quantum computing isn't that difficult. Trust me! I learned and built this simulator within a week with no prior quantum computing knowledge. This gem can also be a great tool to facilitate learning about quantum computing.
 
-[Check out the many examples in this repo.](https://github.com/AlessandroMinali/quantum_ruby/tree/master/examples)
-[The source code is highly annotated so don't be afraid to check it out.](https://github.com/AlessandroMinali/quantum_ruby/blob/master/lib/quantum_ruby.rb)
+- [Check out the many examples in this repo.](https://github.com/AlessandroMinali/quantum_ruby/tree/master/examples)  
+- [The source code is highly annotated so don't be afraid to check it out.](https://github.com/AlessandroMinali/quantum_ruby/blob/master/lib/quantum_ruby.rb)
 
 ## How to learn about Quantum Computers
 1. Have an understanding of Linear Algebra. This [series of youtube lectures](https://www.youtube.com/playlist?list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab) can get you up to speed on everything you need to know
