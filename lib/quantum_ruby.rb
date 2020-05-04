@@ -5,7 +5,7 @@ require 'matrix'
 # Overrides for base ruby base classes
 class Matrix
   #
-  # Takes two arbitrary sized resulting in a block matrix
+  # Takes two arbitrary sized matrices resulting in a block matrix
   # according to the Kronecker Product
   # Details: https://en.wikipedia.org/wiki/Kronecker_product
   def kronecker(m)
