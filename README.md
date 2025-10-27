@@ -14,7 +14,7 @@ Learning about quantum computing isn't that difficult. Trust me! I learned and b
 2. Read this great intro to quantum computing. This is the single resource that I read before I began implementing this simulator: [Quantum computing for the very curious](https://quantum.country/qcvc)
 3. Experiment with this simulator as you learn about quantum computing
 4. Read the [other articles](https://quantum.country) about quantum computing. Read wiki pages about [qubits](https://en.wikipedia.org/wiki/Qubit) and [quantum gates](https://en.wikipedia.org/wiki/Quantum_logic_gate). Both should be understandable to you now!
-5. If you ever get stuck start back at the top of this list or reach out to me with questions: `alessandro.minali AT gmail DOT com`
+5. If you ever get stuck start back at the top of this list or create an issue on this repo.
 
 ## Installation
 Add this line to your application's Gemfile:
